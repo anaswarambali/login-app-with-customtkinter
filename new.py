@@ -144,6 +144,21 @@ class App(customtkinter.CTk):
             print('WTF')
             messagebox.showerror("Error", "Please enter some values")
 
+        con = sql.connect('login.db')
+        con = db()
+        a = con.cursor()
+        a.execute("select * from login where username='" + username + "' and password = '" + passwords + "'")
+        results = a.fetchall()
+        count = len(results)
+        print(count)
+        if count > 0:
+            con.close()
+            messagebox.showinfo("Success", "Correct Credentials")
+            #win.destroy()
+            # open_main()
+        else:
+            messagebox.showinfo("message", "Wrong username or password")
+
     def change_appearance_mode(self, new_appearance_mode):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
