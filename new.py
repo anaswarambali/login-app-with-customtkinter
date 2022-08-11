@@ -54,14 +54,14 @@ class App(customtkinter.CTk):
         # ============ frame_left ============
 
         self.label_1 = customtkinter.CTkLabel(master=self.frame_left, text="HUBSPOT", width=200, text_font=("Roboto Medium", 16))
-        self.button_1 = customtkinter.CTkButton(master=self.frame_left, text="+ New User", command=self.button_event)
-        self.button_2 = customtkinter.CTkButton(master=self.frame_left, text="- Delete User", command=self.button_event)
+        #self.button_1 = customtkinter.CTkButton(master=self.frame_left, text="+ New User", command=self.button_event)
+        #self.button_2 = customtkinter.CTkButton(master=self.frame_left, text="- Delete User", command=self.button_event)
         self.label_mode = customtkinter.CTkLabel(master=self.frame_left, text="Appearance Mode:")
         self.optionmenu_1 = customtkinter.CTkOptionMenu(master=self.frame_left, values=["Light", "Dark", "System"], command=self.change_appearance_mode)
 
         self.label_1.grid(row=1, column=0, pady=10, sticky='EW')
-        self.button_1.grid(row=2, column=0, pady=10)
-        self.button_2.grid(row=3, column=0, pady=10)
+        #self.button_1.grid(row=2, column=0, pady=10)
+        #self.button_2.grid(row=3, column=0, pady=10)
         self.label_mode.grid(row=5, column=0, pady=0)
         self.optionmenu_1.grid(row=6, column=0, pady=10)
 
@@ -121,7 +121,7 @@ class App(customtkinter.CTk):
         self.frame_middle.grid_rowconfigure((2, 3, 4), weight=1)
 
         # set default values
-        self.optionmenu_1.set("Dark")
+        self.optionmenu_1.set("System")
         create()
 
     def show_password(self):
@@ -144,18 +144,17 @@ class App(customtkinter.CTk):
             print('WTF')
             messagebox.showerror("Error", "Please enter some values")
 
-        con = sql.connect('login.db')
-        con = db()
-        a = con.cursor()
-        a.execute("select * from login where username='" + username + "' and password = '" + passwords + "'")
-        results = a.fetchall()
-        count = len(results)
+        self.con = sql.connect('login.db')
+        self.a = self.con.cursor()
+        self.a.execute("select * from login where username='{0}' and password = '{1}'".format(username, password))
+
+        self.results = self.a.fetchall()
+        print(self.results, "results")
+        count = len(self.results)
         print(count)
         if count > 0:
-            con.close()
+            self.con.close()
             messagebox.showinfo("Success", "Correct Credentials")
-            #win.destroy()
-            # open_main()
         else:
             messagebox.showinfo("message", "Wrong username or password")
 
