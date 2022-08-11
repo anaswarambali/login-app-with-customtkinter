@@ -1,7 +1,7 @@
 import sqlite3 as sql
 import customtkinter
 from tkinter import messagebox
-import bcrypt
+#import bcrypt
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -34,6 +34,9 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
+        self.a = None
+        self.con = None
+        self.results = None
         self.title(" ")
         self.geometry(f"{App.WIDTH}x{App.HEIGHT}")
         self.iconbitmap('log.ico')
