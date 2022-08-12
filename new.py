@@ -1,7 +1,7 @@
 import sqlite3 as sql
 import customtkinter
 from tkinter import messagebox
-#import bcrypt
+import bcrypt
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -11,23 +11,24 @@ def create():
     try:
         con = sql.connect("login.db")
         con.execute('''CREATE TABLE IF NOT EXISTS login (
-                            username varchar(200) PRIMARY KEY NOT NULL,
-                            password varchar(200) NOT NULL,
+                            username char(200) NOT NULL,
+                            password char(200) NOT NULL,
                             pin int(4) NOT NULL
                             );''')
-        con.execute("INSERT INTO login (username, password, pin) VALUES('admin', 'root', 1234);")
+        user = bcrypt.hashpw(b'admin', bcrypt.gensalt())
+        pssd = bcrypt.hashpw(b'root', bcrypt.gensalt())
+        con.execute("INSERT INTO login (username, password, pin) VALUES(?, ?, 1234);", (user, pssd))
         con.commit()
         con.close()
     except sql.IntegrityError:
         print("tables present")
-    except:
+    except Exception:
         print("Errors are the key to success")
     else:
         print("Success")
 
 
 class App(customtkinter.CTk):
-
     WIDTH = 780
     HEIGHT = 520
 
@@ -56,19 +57,17 @@ class App(customtkinter.CTk):
 
         # ============ frame_left ============
 
-        self.label_1 = customtkinter.CTkLabel(master=self.frame_left, text="HUBSPOT", width=200, text_font=("Roboto Medium", 16))
-        #self.button_1 = customtkinter.CTkButton(master=self.frame_left, text="+ New User", command=self.button_event)
-        #self.button_2 = customtkinter.CTkButton(master=self.frame_left, text="- Delete User", command=self.button_event)
+        self.label_1 = customtkinter.CTkLabel(master=self.frame_left, text="HUBSPOT", width=200,
+                                              text_font=("Roboto Medium", 16))
         self.label_mode = customtkinter.CTkLabel(master=self.frame_left, text="Appearance Mode:")
-        self.optionmenu_1 = customtkinter.CTkOptionMenu(master=self.frame_left, values=["Light", "Dark", "System"], command=self.change_appearance_mode)
+        self.option_menu = customtkinter.CTkOptionMenu(master=self.frame_left, values=["Light", "Dark", "System"],
+                                                       command=self.change_appearance_mode)
 
         self.label_1.grid(row=1, column=0, pady=10, sticky='EW')
-        #self.button_1.grid(row=2, column=0, pady=10)
-        #self.button_2.grid(row=3, column=0, pady=10)
         self.label_mode.grid(row=5, column=0, pady=0)
-        self.optionmenu_1.grid(row=6, column=0, pady=10)
+        self.option_menu.grid(row=6, column=0, pady=10)
 
-        self.frame_left.grid_rowconfigure((0, 7), minsize=15)   # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure((0, 7), minsize=15)  # empty row with minsize as spacing
         self.frame_left.grid_rowconfigure(4, weight=1)  # empty row as spacing
         self.frame_left.columnconfigure(0, weight=1)  # to align the text
 
@@ -84,9 +83,11 @@ class App(customtkinter.CTk):
                                               placeholder_text="username")
         self.entry_2 = customtkinter.CTkEntry(master=self.frame_login, corner_radius=3, height=40, justify='center',
                                               placeholder_text="password", show='*')
-        self.check_b = customtkinter.CTkCheckBox(master=self.frame_login, text='Show Password', text_font=("Roboto Medium", 8),
-                                                 variable=self.show_pass, onvalue=1, offvalue=0,command=self.show_password)
-        self.button2 = customtkinter.CTkButton(master=self.frame_login, corner_radius=6, height=40, text="Login", command=self.login_button)
+        self.check_b = customtkinter.CTkCheckBox(master=self.frame_login, text='Show Password',
+                                                 text_font=("Roboto Medium", 8), variable=self.show_pass,
+                                                 onvalue=1, offvalue=0, command=self.show_password)
+        self.button2 = customtkinter.CTkButton(master=self.frame_login, corner_radius=6, height=40, text="Login",
+                                               command=self.login_button)
 
         self.lab_inf.grid(column=0, row=0, sticky="nwe", padx=10, pady=10)
         self.label_0.grid(column=0, row=1, sticky="nwe", padx=10, pady=10)
@@ -110,10 +111,13 @@ class App(customtkinter.CTk):
         self.switch_enp = customtkinter.StringVar(value="on")
         self.switch_bio = customtkinter.StringVar(value="on")
 
-        self.switch1 = customtkinter.CTkSwitch(master=self.frame_middle, text="WITHOUT SALT", variable=self.switch_pss, onvalue='on', offvalue='off',
+        self.switch1 = customtkinter.CTkSwitch(master=self.frame_middle, text="WITHOUT SALT", variable=self.switch_pss,
+                                               onvalue='on', offvalue='off',
                                                command=self.show_password)
-        self.switch2 = customtkinter.CTkSwitch(master=self.frame_middle, text="  ENCRYPTION  ", variable=self.switch_enp, onvalue='on', offvalue='off')
-        self.switch3 = customtkinter.CTkSwitch(master=self.frame_middle, text="  BIOMETRICS  ", variable=self.switch_bio, onvalue='on', offvalue='off')
+        self.switch2 = customtkinter.CTkSwitch(master=self.frame_middle, text="  ENCRYPTION  ",
+                                               variable=self.switch_enp, onvalue='on', offvalue='off')
+        self.switch3 = customtkinter.CTkSwitch(master=self.frame_middle, text="  BIOMETRICS  ",
+                                               variable=self.switch_bio, onvalue='on', offvalue='off')
 
         self.label_rdio_grp.grid(row=1, column=2, pady=10, padx=10, sticky="")
         self.switch3.grid(row=2, column=2, pady=10, padx=10, sticky="")
@@ -124,8 +128,7 @@ class App(customtkinter.CTk):
         self.frame_middle.grid_rowconfigure((2, 3, 4), weight=1)
 
         # set default values
-        self.optionmenu_1.set("System")
-        create()
+        self.option_menu.set("System")
 
     def show_password(self):
         if self.show_pass.get() == 1:
@@ -142,29 +145,34 @@ class App(customtkinter.CTk):
         print('Login pressed')
         username, password = self.entry_1.get(), self.entry_2.get()
         if username or password:
-            print(username, password)
+            self.con = sql.connect('login.db')
+            self.a = self.con.cursor()
+            self.a.execute("select * from login")
+
+            self.results = self.a.fetchall()
+            count = len(self.results)
+            if count > 0:
+                for i in self.results:
+                    print(type(i[0]), 'type\n')
+                    if bcrypt.checkpw(username.encode('utf-8'), i[0]):
+                        if bcrypt.checkpw(password.encode('utf-8'), i[1]):
+                            messagebox.showinfo("Success", "Correct Credentials")
+                        else:
+                            messagebox.showerror("Error", "Wrong password")
+                        break
+                else:
+                    messagebox.askyesno("User Doesn't Exist", 'Do you want to create')
+            else:
+                messagebox.showinfo("message", "Wrong username or password")
         else:
             print('WTF')
             messagebox.showerror("Error", "Please enter some values")
 
-        self.con = sql.connect('login.db')
-        self.a = self.con.cursor()
-        self.a.execute("select * from login where username='{0}' and password = '{1}'".format(username, password))
-
-        self.results = self.a.fetchall()
-        print(self.results, "results")
-        count = len(self.results)
-        print(count)
-        if count > 0:
-            self.con.close()
-            messagebox.showinfo("Success", "Correct Credentials")
-        else:
-            messagebox.showinfo("message", "Wrong username or password")
-
-    def change_appearance_mode(self, new_appearance_mode):
+    @staticmethod
+    def change_appearance_mode(new_appearance_mode):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
-    def on_closing(self, event=0):
+    def on_closing(self):
         self.destroy()
 
 
