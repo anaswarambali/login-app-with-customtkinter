@@ -1,29 +1,24 @@
-# import sqlite3 as sql
+import sqlite3 as sql
 import customtkinter
-import tkinter as tk
-from tkinter import messagebox
 import create_table as ct
-from admin import AdminApp
+from tkinter import messagebox
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 
-class App(customtkinter.CTk):
+class AdminApp(customtkinter.CTk):
     WIDTH = 780
     HEIGHT = 520
 
     def __init__(self):
         super().__init__()
 
-        self.logout_button = None
-        self.del_user = None
-        self.add_user = None
         self.a = None
         self.con = None
         self.results = None
         self.title(" ")
-        self.geometry(f"{App.WIDTH}x{App.HEIGHT}")
+        self.geometry(f"{AdminApp.WIDTH}x{AdminApp.HEIGHT}")
         self.iconbitmap('log.ico')
         self.protocol("WM_DELETE_WINDOW", self.on_closing)  # call .on_closing() when app gets closed
 
@@ -69,27 +64,21 @@ class App(customtkinter.CTk):
                                               placeholder_text="password", show='*')
         self.check_b = customtkinter.CTkCheckBox(master=self.frame_login, text='Show Password',
                                                  text_font=("Roboto Medium", 8), variable=self.show_pass,
-                                                 onvalue=1, offvalue=0, command=self.show_password)
-        self.sign_up = customtkinter.CTkButton(master=self.frame_login, text='Sign Up', text_font=("Roboto Medium", 8),
-                                               fg_color=self.frame_login.fg_color, activecolor='grey',  width=2)
-        self.button2 = customtkinter.CTkButton(master=self.frame_login, corner_radius=6, height=40, text="Login",
-                                               command=self.login_button)
+                                                 onvalue=1, offvalue=0)
+        self.button2 = customtkinter.CTkButton(master=self.frame_login, corner_radius=6, height=40, text="Login")
 
-        self.lab_inf.grid(column=0, row=0, sticky="nwe", padx=10, pady=10, columnspan=2)
-        self.label_0.grid(column=0, row=1, sticky="nwe", padx=10, pady=10, columnspan=2)
-        self.entry_1.grid(column=0, row=2, sticky="nwe", padx=10, pady=10, columnspan=2)
-        self.entry_2.grid(column=0, row=3, sticky="nwe", padx=10, pady=10, columnspan=2)
+        self.lab_inf.grid(column=0, row=0, sticky="nwe", padx=10, pady=10)
+        self.label_0.grid(column=0, row=1, sticky="nwe", padx=10, pady=10)
+        self.entry_1.grid(column=0, row=2, sticky="nwe", padx=10, pady=10)
+        self.entry_2.grid(column=0, row=3, sticky="nwe", padx=10, pady=10)
         self.check_b.grid(column=0, row=4, sticky="nwe", padx=10, pady=10)
-        self.sign_up.grid(column=1, row=4, sticky="e", padx=10, pady=10)
-        self.button2.grid(column=0, row=5, sticky="nwe", padx=10, pady=10, columnspan=2)
+        self.button2.grid(column=0, row=5, sticky="nwe", padx=10, pady=10)
 
         self.frame_middle.grid_columnconfigure(0, weight=1)  # To make the frame expand to fill
         self.frame_middle.grid_rowconfigure(0, weight=1)  # To vertically fill the frame
-        self.frame_middle.grid_columnconfigure(4, weight=1)  # To vertically fill the frame
-
         self.frame_login.grid_rowconfigure(0, weight=1)
         self.frame_login.grid_rowconfigure(6, minsize=20)
-        self.frame_login.grid_columnconfigure((0, 1), weight=1)  # To make the entry field expand to fill
+        self.frame_login.grid_columnconfigure(0, weight=1)  # To make the entry field expand to fill
 
         # ============ frame_right ============
 
@@ -101,8 +90,7 @@ class App(customtkinter.CTk):
         self.switch_bio = customtkinter.StringVar(value="on")
 
         self.switch1 = customtkinter.CTkSwitch(master=self.frame_middle, text="WITHOUT SALT", variable=self.switch_pss,
-                                               onvalue='on', offvalue='off',
-                                               command=self.show_password)
+                                               onvalue='on', offvalue='off')
         self.switch2 = customtkinter.CTkSwitch(master=self.frame_middle, text="  ENCRYPTION  ",
                                                variable=self.switch_enp, onvalue='on', offvalue='off')
         self.switch3 = customtkinter.CTkSwitch(master=self.frame_middle, text="  BIOMETRICS  ",
@@ -119,60 +107,19 @@ class App(customtkinter.CTk):
         # set default values
         self.option_menu.set("System")
 
-    def show_password(self):
-        if self.show_pass.get() == 1:
-            print(self.show_pass.get())
-            self.entry_2.configure(show='')
-        else:
-            self.entry_2.configure(show='*')
-
-    def button_event(self):
-        print("Button pressed")
-        print(self.switch_pss.get())
-
-    def login_button(self):
-        username, password = self.entry_1.get(), self.entry_2.get()
-        if username or password:
-            if ct.check_password(username, password):
-                self.admin()
-        else:
-            messagebox.showerror("Error", "Please enter some values jumped else")
-
-    def admin(self):
-        self.frame_middle.destroy()
-
-        # =========================================================================
-
-        self.add_user = customtkinter.CTkButton(master=self.frame_left, text="+ Add User")
-        self.del_user = customtkinter.CTkButton(master=self.frame_left, text="- Delete User")
-
-        self.add_user.grid(row=2, column=0, padx=20, pady=10, sticky='EW')
-        self.del_user.grid(row=3, column=0, padx=20, pady=10, sticky='EW')
-
-        # =======================================================================
-
-        self.frame_middle = customtkinter.CTkFrame(master=self, corner_radius=5)
-        self.frame_middle.grid(row=0, column=1, sticky="news", padx=5, pady=5)
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=10)
-        self.grid_rowconfigure(0, weight=1)
-
-        self.logout_button = customtkinter.CTkButton(master=self.frame_middle, text="logout")
-        self.logout_button.grid(row=0, column=0, sticky='se', padx=10, pady=10)
-
-        self.frame_middle.grid_rowconfigure(0, weight=1)
-        self.frame_middle.grid_columnconfigure(0, weight=1)
-        self.frame_middle.grid_rowconfigure(1, minsize=15)
-        self.frame_middle.grid_columnconfigure(1, minsize=15)
-
     def change_appearance_mode(self, new_appearance_mode):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
     def on_closing(self):
         self.destroy()
 
+    def login_button(self):
+        print('Login pressed')
+        username, password = self.entry_1.get(), self.entry_2.get()
+        if username or password:
+            if ct.check_password(username, password):
+                self.destroy()
 
-if __name__ == '__main__':
-    app = App()
+if __name__=='__main__':
+    app = AdminApp()
     app.mainloop()

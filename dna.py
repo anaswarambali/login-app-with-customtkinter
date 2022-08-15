@@ -4,6 +4,7 @@ import tkinter
 
 text = "na no body does it better"
 
+
 class User:
 
     def __init__(self, username, password):
